@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Arrive/customToast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
@@ -28,6 +29,13 @@ void doGeofenceActions() async {
   await DotEnv().load('.env');
   List<String> devicesToToggle = [];
   SharedPreferences prefs = await SharedPreferences.getInstance();
+  String _ewelinkEmail = prefs.getString('ewelinkEmail');
+  String _ewelinkPassword = prefs.getString('ewelinkPassword');
+  if (_ewelinkEmail == null || _ewelinkPassword == null) {
+    LocalNotifications.send("Arrive", "Couldn't do geofence actions, missing ewelink credentials");
+    return;
+  }
+
   String gate = prefs.getString("gateSelected");
   String lights = prefs.getString("lightSelected");
   if (gate != null) devicesToToggle.add(kGarageGateDeviceId);
@@ -39,12 +47,11 @@ void doGeofenceActions() async {
   devicesToToggle.forEach((element) async {
     try {
       print('toggling device $element');
-      var response = await http.post(kEwelinkEndpoint, body: json.encode({"verifier": kEwelinkVerifier, "deviceId": element}), headers: {
-        "Accept": "*/*",
-        "Content-Type": "application/json",
-      });
+      var response = await http.post(kEwelinkEndpoint,
+          body: json.encode({"deviceId": element, "ewelinkEmail": _ewelinkEmail, "ewelinkPassword": _ewelinkPassword}),
+          headers: {"Accept": "*/*", "Content-Type": "application/json", "x-api-key": kLambdaAPIKey});
       var responseBody = json.decode(response.body);
-      print("response::: $responseBody");
+      print("toggle response::: $responseBody");
       LocalNotifications.send("Arrive", "Backend response $responseBody");
       prefs.remove('gateSelected');
       prefs.remove('lightSelected');
@@ -97,6 +104,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _settingsLoaded = false;
+  String ewelinkEmail;
+  String ewelinkPassword;
+
+  final _formKey = GlobalKey<FormState>();
+  final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+  bool _isLoading = false;
+
   bool gateSelected = false;
   bool lightSelected = false;
 
@@ -109,12 +125,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    String _ewelinkEmail = prefs.getString('ewelinkEmail');
+    String _ewelinkPassword = prefs.getString('ewelinkPassword');
+
     String gate = prefs.getString("gateSelected");
     String lights = prefs.getString("lightSelected");
     print('gate and lights $gate $lights');
+//    await Future.delayed(Duration(seconds: 3));
     setState(() {
       if (gate != null) gateSelected = true;
       if (lights != null) lightSelected = true;
+      if (_ewelinkEmail != null) ewelinkEmail = _ewelinkEmail;
+      if (_ewelinkPassword != null) ewelinkPassword = _ewelinkPassword;
+      _settingsLoaded = true;
     });
     setGeofenceState(gate != null || lights != null);
   }
@@ -172,25 +195,65 @@ class _MyHomePageState extends State<MyHomePage> {
     return true;
   }
 
+  void loginEwelink(email, password) async {
+    setState(() {
+      _isLoading = true;
+    });
+    var response = await http
+        .post(kEwelinkEndpoint, body: json.encode({"ewelinkEmail": email, "ewelinkPassword": password}), headers: {"Accept": "*/*", "Content-Type": "application/json", "x-api-key": kLambdaAPIKey});
+    var responseBody = json.decode(response.body);
+    print("ewelink login response::: $responseBody");
+    if (responseBody["result"] != true || responseBody["error"] != null || responseBody["user"] == null) {
+      CustomToast.showError(responseBody["message"] ?? responseBody["msg"] ?? "Login failed");
+    } else {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('ewelinkEmail', email);
+      prefs.setString('ewelinkPassword', password);
+      setState(() {
+        ewelinkEmail = email;
+        ewelinkPassword = password;
+      });
+    }
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void logoutEwelink() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('ewelinkEmail');
+    prefs.remove('ewelinkPassword');
+    setState(() {
+      ewelinkEmail = null;
+      ewelinkPassword = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(
+          widget.title,
+//          style: TextStyle(
+//            fontFamily: 'Pacifico',
+//            fontSize: 25,
+//          ),
+        ),
       ),
-      backgroundColor: Colors.teal[200],
+      backgroundColor: Colors.teal[50],
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.all(5),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      'Garage gate ${gateSelected ? "will open once you get home" : "is idle"}',
+        child: !_settingsLoaded
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : (ewelinkEmail == null || ewelinkPassword == null)
+                ? Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      'Please login to ewelink',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: 'Pacifico',
@@ -198,73 +261,167 @@ class _MyHomePageState extends State<MyHomePage> {
                         color: Colors.teal[900],
                       ),
                     ),
-                  ),
-                  ToggleButtons(
-                    children: [Icon(Icons.home)],
-                    isSelected: [gateSelected],
-                    onPressed: (index) async {
-                      if (!gateSelected) {
-                        // to enable this, you have to authenticate
-                        var localAuth = LocalAuthentication();
+                    Form(
+                      key: _formKey,
+                      child: Column(children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 50),
+                          child: TextFormField(
+                            decoration: InputDecoration(hintText: 'name@example.com'),
+                            controller: _emailCtrl,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Please enter ewelink email';
+                              }
+                              Pattern pattern =
+                                  r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                              RegExp regex = new RegExp(pattern);
+                              if (!regex.hasMatch(value))
+                                return 'Please enter a valid email';
+                              else
+                                return null;
+                              return null;
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(50, 0, 50, 10),
+                          child: TextFormField(
+                            decoration: InputDecoration(hintText: 'password'),
+                            controller: _passwordCtrl,
+                            obscureText: true,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Please enter ewelink password';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(50, 0, 50, 10),
+                          child: Container(
+                              height: 50,
+                              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                              child: RaisedButton(
+                                textColor: Colors.white,
+                                color: Colors.teal,
+                                child: Text(_isLoading ? 'Logging in' : 'Login'),
+                                onPressed: () {
+                                  if (_formKey.currentState.validate()) {
+//                                print(_emailCtrl.text);
+//                                print(_passwordCtrl.text);
+                                    loginEwelink(_emailCtrl.text, _passwordCtrl.text);
+                                  }
+                                },
+                              )),
+                        ),
+                        _isLoading
+                            ? Center(
+                                child: CircularProgressIndicator(),
+                              )
+                            : Container(),
+                      ]),
+                    ),
+                  ])
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 80),
+                        child: Container(
+                          height: 40,
+                          child: RaisedButton(
+                            child: Text('Logout'),
+                            textColor: Colors.white,
+                            color: Colors.teal,
+                            onPressed: logoutEwelink,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(5),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                'Garage gate ${gateSelected ? "will open once you get home" : ""}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Pacifico',
+                                  fontSize: 25,
+                                  color: Colors.teal[900],
+                                ),
+                              ),
+                            ),
+                            ToggleButtons(
+                              children: [Icon(Icons.home)],
+                              isSelected: [gateSelected],
+                              onPressed: (index) async {
+                                if (!gateSelected) {
+                                  // to enable this, you have to authenticate
+                                  var localAuth = LocalAuthentication();
 //                        bool canCheckBiometrics = await localAuth.canCheckBiometrics;
 //                        print('can check biometrics $canCheckBiometrics');
-                        bool didAuthenticate = await localAuth.authenticateWithBiometrics(localizedReason: 'Please authenticate to enable garage gate');
-                        if (!didAuthenticate) return;
-                      }
-                      setState(() {
-                        gateSelected = !gateSelected;
-                      });
-                      await setGateSelected(gateSelected);
-                      setGeofenceState(gateSelected || lightSelected);
-                    },
+                                  bool didAuthenticate = await localAuth.authenticateWithBiometrics(localizedReason: 'Please authenticate to enable garage gate');
+                                  if (!didAuthenticate) return;
+                                }
+                                setState(() {
+                                  gateSelected = !gateSelected;
+                                });
+                                await setGateSelected(gateSelected);
+                                setGeofenceState(gateSelected || lightSelected);
+                              },
 //                borderRadius: BorderRadius.circular(50),
-                    borderWidth: 2,
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 120,
-            ),
-            Container(
-              padding: EdgeInsets.all(5),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      'Garage lights ${lightSelected ? "will turn on once you get home" : "are idle"}',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Pacifico',
-                        fontSize: 25,
-                        color: Colors.teal[900],
+                              borderWidth: 2,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                      SizedBox(
+                        height: 120,
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(5),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                'Garage lights ${lightSelected ? "will turn on once you get home" : ""}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Pacifico',
+                                  fontSize: 25,
+                                  color: Colors.teal[900],
+                                ),
+                              ),
+                            ),
+                            ToggleButtons(
+                              children: [Icon(Icons.lightbulb_outline)],
+                              isSelected: [lightSelected],
+                              onPressed: (index) async {
+                                if (!lightSelected) {
+                                  // to enable this, you have to authenticate
+                                  var localAuth = LocalAuthentication();
+                                  bool didAuthenticate = await localAuth.authenticateWithBiometrics(localizedReason: 'Please authenticate to enable garage lights');
+                                  if (!didAuthenticate) return;
+                                }
+                                setState(() {
+                                  lightSelected = !lightSelected;
+                                });
+                                await setLightSelected(lightSelected);
+                                setGeofenceState(gateSelected || lightSelected);
+                              },
+                              borderWidth: 2,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  ToggleButtons(
-                    children: [Icon(Icons.lightbulb_outline)],
-                    isSelected: [lightSelected],
-                    onPressed: (index) async {
-                      if (!lightSelected) {
-                        // to enable this, you have to authenticate
-                        var localAuth = LocalAuthentication();
-                        bool didAuthenticate = await localAuth.authenticateWithBiometrics(localizedReason: 'Please authenticate to enable garage lights');
-                        if (!didAuthenticate) return;
-                      }
-                      setState(() {
-                        lightSelected = !lightSelected;
-                      });
-                      await setLightSelected(lightSelected);
-                      setGeofenceState(gateSelected || lightSelected);
-                    },
-                    borderWidth: 2,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

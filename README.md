@@ -11,7 +11,7 @@ please structure your .env file as:
 GarageGateDeviceId=<some_id>
 GarageLightsDeviceId=<other_id>
 EwelinkEndpoint=<cloud_function_endpoint>
-EwelinkVerifier=<cloud_function_verifier>
+LambdaAPIKey=<cloud_function_api_key>
 
 HomeLocationId=<home location id (random string)>
 HomeLatitude=<home location latitude>
