@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 String kGarageGateDeviceId = DotEnv().env['GarageGateDeviceId'];
@@ -9,3 +12,8 @@ const double kGeofenceRadius = 150;
 String kHomeLocationId = DotEnv().env['HomeLocationId'];
 double kHomeLatitude = double.parse(DotEnv().env['HomeLatitude']);
 double kHomeLongitude = double.parse(DotEnv().env['HomeLongitude']);
+
+const Color kPrimaryColor = Colors.teal;
+Color kBackgroundColor = Colors.teal[50];
+Color kBoldFontColor = Colors.teal[900];
+Color kButtonTextColor = Colors.white;
