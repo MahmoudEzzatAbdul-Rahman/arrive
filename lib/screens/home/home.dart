@@ -45,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void getDevices() async {
+    deviceList = [];
     var response = await EwelinkAPI.post({'requestMethod': 'getDevices'});
 //    print("ewelink get devices response::: ${response}");
     int i = 0;
