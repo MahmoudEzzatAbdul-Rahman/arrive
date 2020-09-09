@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart';
 import 'package:http/http.dart' as http;
 
-import '../localNotifications.dart';
+import 'localNotifications.dart';
 
 void backgroundGeofenceHeadlessTask(HeadlessEvent headlessEvent) async {
   print(' --> $headlessEvent');
