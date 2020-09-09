@@ -5,6 +5,7 @@ import 'package:flutter_background_geolocation/flutter_background_geolocation.da
 import 'package:http/http.dart' as http;
 
 import 'constants.dart';
+import 'ewelinkapi.dart';
 import 'localNotifications.dart';
 
 void backgroundGeofenceHeadlessTask(HeadlessEvent headlessEvent) async {
@@ -47,10 +48,10 @@ void doGeofenceActions() async {
   devicesToToggle.forEach((element) async {
     try {
       print('toggling device $element');
-      var response = await http.post(kEwelinkEndpoint,
-          body: json.encode({"deviceId": element, "ewelinkEmail": _ewelinkEmail, "ewelinkPassword": _ewelinkPassword}),
-          headers: {"Accept": "*/*", "Content-Type": "application/json", "x-api-key": kLambdaAPIKey});
-      var responseBody = json.decode(response.body);
+      var responseBody = await EwelinkAPI.post({
+        'requestMethod': 'toggleDevice',
+        "deviceId": element,
+      });
       print("toggle response::: $responseBody");
       LocalNotifications.send("Arrive", "Backend response $responseBody");
       await prefs.setBool('gateSelected', false);

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:Arrive/utils/ewelinkapi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,9 +30,10 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       _isLoading = true;
     });
-    var response = await http
-        .post(kEwelinkEndpoint, body: json.encode({"ewelinkEmail": email, "ewelinkPassword": password}), headers: {"Accept": "*/*", "Content-Type": "application/json", "x-api-key": kLambdaAPIKey});
-    var responseBody = json.decode(response.body);
+    var responseBody = await EwelinkAPI.post({
+      "ewelinkEmail": email,
+      "ewelinkPassword": password,
+    });
     print("ewelink login response::: $responseBody");
     if (responseBody["result"] != true || responseBody["error"] != null || responseBody["user"] == null) {
       CustomToast.showError(responseBody["message"] ?? responseBody["msg"] ?? "Login failed");
