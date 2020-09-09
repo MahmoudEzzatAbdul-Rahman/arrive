@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-import '../constants.dart';
+import '../utils/constants.dart';
+import '../utils/colors.dart';
 import '../utils/customToast.dart';
 import 'home.dart';
 

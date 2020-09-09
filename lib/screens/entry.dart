@@ -1,10 +1,10 @@
 import 'package:Arrive/screens/home.dart';
+import 'package:Arrive/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../constants.dart';
 import 'login.dart';
 
 class EntryScreen extends StatelessWidget {

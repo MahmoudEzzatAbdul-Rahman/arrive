@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:Arrive/constants.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart';
 import 'package:http/http.dart' as http;
 
+import 'constants.dart';
 import 'localNotifications.dart';
 
 void backgroundGeofenceHeadlessTask(HeadlessEvent headlessEvent) async {

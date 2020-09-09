@@ -1,4 +1,5 @@
 import 'package:Arrive/components/sidedrawer.dart';
+import 'package:Arrive/utils/colors.dart';
 import 'package:Arrive/utils/geofence.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
 
-import '../constants.dart';
+import '../utils/constants.dart';
 
 bg.Geofence parseGeofence(dynamic location) {
   return new bg.Geofence(identifier: location["_id"], latitude: location["latitude"], longitude: location["longitude"], radius: kGeofenceRadius, notifyOnEntry: true, notifyOnExit: true);
