@@ -57,8 +57,15 @@ class _DeviceListItemState extends State<DeviceListItem> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(widget.device.name),
-                      Text('State: ${widget.device.state}'),
+                      Text(
+                        widget.device.name,
+                        style: TextStyle(
+                          fontFamily: 'Pacifico',
+                          fontSize: 20,
+                          color: kBoldFontColor,
+                        ),
+                      ),
+//                      Text('State: ${widget.device.state}'),
 //                      Text(device.online ? 'Online' : ''),
                     ],
                   ),
@@ -67,22 +74,16 @@ class _DeviceListItemState extends State<DeviceListItem> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-//                    Text('x'),
-                        RaisedButton(
-                          child: _changingDeviceState
-                              ? CircularProgressIndicator()
-                              : Switch(
-                                  value: widget.device.state == "on",
-                                  activeTrackColor: kPrimaryColor,
-                                  activeColor: kBoldFontColor,
-                                  onChanged: (val) {
-                                    toggleDevice();
-                                  },
-                                ),
-                          onPressed: () {
-                            print('toggling ${widget.device.deviceId}');
-                          },
-                        ),
+                        _changingDeviceState
+                            ? CircularProgressIndicator()
+                            : Switch(
+                                value: widget.device.state == "on",
+                                activeTrackColor: kPrimaryColor,
+                                activeColor: kBoldFontColor,
+                                onChanged: (val) {
+                                  toggleDevice();
+                                },
+                              ),
                       ],
                     ),
                   ),
