@@ -1,7 +1,5 @@
-import 'dart:convert';
-
 import 'package:Arrive/screens/entry.dart';
-import 'package:Arrive/screens/home.dart';
+import 'package:Arrive/screens/home/home.dart';
 import 'package:Arrive/screens/login.dart';
 import 'package:Arrive/utils/geofence.dart';
 import 'package:flutter/cupertino.dart';

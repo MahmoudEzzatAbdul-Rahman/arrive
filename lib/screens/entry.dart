@@ -1,4 +1,4 @@
-import 'package:Arrive/screens/home.dart';
+import 'package:Arrive/screens/home/home.dart';
 import 'package:Arrive/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
