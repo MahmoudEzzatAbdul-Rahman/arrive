@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+//enum DeviceAction { toggle, turnon, turnoff }
+enum DeviceAction { toggle } // initially we'll support toggle only
+
 class EwelinkDevice {
   String name;
   String state;
@@ -5,6 +10,8 @@ class EwelinkDevice {
   bool online;
 
   EwelinkDevice(this.name, this.deviceId, {this.state, this.online});
+
+  factory EwelinkDevice.fromString(String s) => EwelinkDevice.fromJson(json.decode(s));
 
   factory EwelinkDevice.fromJson(Map<String, dynamic> json) => EwelinkDevice(
         json["name"],
@@ -18,4 +25,6 @@ class EwelinkDevice {
         "deviceId": deviceId,
         "state": state,
       };
+
+  String toString() => json.encode(toJson());
 }

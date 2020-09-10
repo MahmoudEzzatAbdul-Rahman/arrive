@@ -7,14 +7,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
 
 import '../../utils/constants.dart';
-import 'DeviceListItem.dart';
-
-bg.Geofence parseGeofence(dynamic location) {
-  return new bg.Geofence(identifier: location["_id"], latitude: location["latitude"], longitude: location["longitude"], radius: kGeofenceRadius, notifyOnEntry: true, notifyOnExit: true);
-}
 
 class HomeScreen extends StatefulWidget {
   static const String routeName = "/home";
@@ -27,9 +21,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _loadingDevices = true;
-  List<EwelinkDevice> deviceList = [];
-
   String ewelinkEmail;
   String ewelinkPassword;
 
@@ -41,24 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // TODO: add geofence
     getSettings();
-    getDevices();
-  }
-
-  void getDevices() async {
-    deviceList = [];
-    var response = await EwelinkAPI.post({'requestMethod': 'getDevices'});
-//    print("ewelink get devices response::: ${response}");
-    int i = 0;
-    var iterator;
-    while (true) {
-      iterator = response[i.toString()];
-      if (iterator == null) break;
-      deviceList.add(EwelinkDevice.fromJson(iterator));
-      i++;
-    }
-    setState(() {
-      _loadingDevices = false;
-    });
   }
 
   void getSettings() async {
@@ -123,11 +96,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                _loadingDevices
-                    ? CircularProgressIndicator()
-                    : Column(
-                        children: deviceList.where((item) => item.online).map((item) => DeviceListItem(item)).toList(),
-                      ),
                 Container(
                   padding: EdgeInsets.all(5),
                   child: Column(

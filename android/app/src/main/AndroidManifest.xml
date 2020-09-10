@@ -46,6 +46,9 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDVXSCn4I9c0tteCnBE1W-1d6RO-OyoTDw"/>
+
         <service android:name="com.transistorsoft.locationmanager.service.TrackingService" android:foregroundServiceType="location" />
         <service android:name="com.transistorsoft.locationmanager.service.LocationRequestService" android:foregroundServiceType="location" />
 

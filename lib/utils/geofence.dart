@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Arrive/models/place.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart';
@@ -27,8 +28,8 @@ void doGeofenceActions() async {
   List<String> devicesToToggle = [];
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.reload();
-  String _ewelinkEmail = prefs.getString('ewelinkEmail');
-  String _ewelinkPassword = prefs.getString('ewelinkPassword');
+  String _ewelinkEmail = prefs.getString(kEwelinkEmailStorage);
+  String _ewelinkPassword = prefs.getString(kEwelinkPasswordStorage);
   if (_ewelinkEmail == null || _ewelinkPassword == null) {
     LocalNotifications.send("Arrive", "Couldn't do geofence actions, missing ewelink credentials");
     return;
@@ -107,6 +108,17 @@ class GeofenceUtilities {
 
   static Future<dynamic> addGeofences(List<Geofence> geofences) async {
     return BackgroundGeolocation.addGeofences(geofences);
+  }
+
+  static Future<dynamic> addGeofence(Place place) async {
+    return BackgroundGeolocation.addGeofence(new Geofence(
+      identifier: place.id,
+      latitude: place.latitude,
+      longitude: place.longitude,
+      radius: kGeofenceRadius,
+      notifyOnEntry: true,
+      notifyOnExit: true,
+    ));
   }
 
   static Future<dynamic> removeGeofence(String locationId) async {

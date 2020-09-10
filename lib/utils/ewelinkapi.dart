@@ -9,8 +9,8 @@ class EwelinkAPI {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.reload();
-      String _ewelinkEmail = prefs.getString('ewelinkEmail');
-      String _ewelinkPassword = prefs.getString('ewelinkPassword');
+      String _ewelinkEmail = prefs.getString(kEwelinkEmailStorage);
+      String _ewelinkPassword = prefs.getString(kEwelinkPasswordStorage);
       Map<String, dynamic> body = event;
       body["ewelinkEmail"] = body["ewelinkEmail"] ?? _ewelinkEmail;
       body["ewelinkPassword"] = body["ewelinkPassword"] ?? _ewelinkPassword;

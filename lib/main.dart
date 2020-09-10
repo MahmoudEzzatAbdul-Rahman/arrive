@@ -1,6 +1,9 @@
+import 'package:Arrive/screens/devices/devicesScreen.dart';
 import 'package:Arrive/screens/entry.dart';
 import 'package:Arrive/screens/home/home.dart';
 import 'package:Arrive/screens/login.dart';
+import 'package:Arrive/screens/places/addPlace.dart';
+import 'package:Arrive/screens/places/placesScreen.dart';
 import 'package:Arrive/utils/geofence.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +30,9 @@ class MyApp extends StatelessWidget {
         EntryScreen.routeName: (_) => EntryScreen(),
         LoginScreen.routeName: (_) => LoginScreen(),
         HomeScreen.routeName: (_) => HomeScreen(),
+        DevicesScreen.routeName: (_) => DevicesScreen(),
+        PlacesScreen.routeName: (_) => PlacesScreen(),
+        AddPlaceScreen.routeName: (_) => AddPlaceScreen(),
       },
     );
   }

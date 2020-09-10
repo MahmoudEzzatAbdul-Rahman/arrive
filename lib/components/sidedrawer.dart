@@ -1,7 +1,8 @@
-import 'dart:io';
-
+import 'package:Arrive/screens/devices/devicesScreen.dart';
 import 'package:Arrive/screens/home/home.dart';
 import 'package:Arrive/screens/login.dart';
+import 'package:Arrive/screens/places/placesScreen.dart';
+import 'package:Arrive/utils/constants.dart';
 import 'package:Arrive/utils/geofence.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,6 +26,26 @@ class SideDrawer extends StatelessWidget {
                   Navigator.pushReplacementNamed(context, HomeScreen.routeName);
                 },
               ),
+              ListTile(
+                leading: Icon(Icons.settings_applications),
+                title: Text(
+                  "Devices",
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, DevicesScreen.routeName);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.map),
+                title: Text(
+                  "Places",
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, PlacesScreen.routeName);
+                },
+              ),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -38,8 +59,8 @@ class SideDrawer extends StatelessWidget {
                       ),
                       onTap: () async {
                         SharedPreferences prefs = await SharedPreferences.getInstance();
-                        prefs.remove('ewelinkEmail');
-                        prefs.remove('ewelinkPassword');
+                        prefs.remove(kEwelinkEmailStorage);
+                        prefs.remove(kEwelinkPasswordStorage);
                         GeofenceUtilities.stopGeofenceService();
                         Navigator.pop(context);
                         Navigator.pushNamedAndRemoveUntil(context, LoginScreen.routeName, (route) => false);

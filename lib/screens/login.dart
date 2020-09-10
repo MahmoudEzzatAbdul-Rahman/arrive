@@ -1,3 +1,4 @@
+import 'package:Arrive/utils/constants.dart';
 import 'package:Arrive/utils/ewelinkapi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -34,8 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
       CustomToast.showError(responseBody["message"] ?? responseBody["msg"] ?? "Login failed");
     } else {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('ewelinkEmail', email);
-      prefs.setString('ewelinkPassword', password);
+      prefs.setString(kEwelinkEmailStorage, email);
+      prefs.setString(kEwelinkPasswordStorage, password);
       setState(() {
         ewelinkEmail = email;
         ewelinkPassword = password;

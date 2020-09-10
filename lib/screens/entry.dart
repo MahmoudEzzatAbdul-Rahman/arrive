@@ -1,5 +1,6 @@
 import 'package:Arrive/screens/home/home.dart';
 import 'package:Arrive/utils/colors.dart';
+import 'package:Arrive/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -12,8 +13,8 @@ class EntryScreen extends StatelessWidget {
 
   _checkForToken(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String _ewelinkEmail = prefs.getString('ewelinkEmail');
-    String _ewelinkPassword = prefs.getString('ewelinkPassword');
+    String _ewelinkEmail = prefs.getString(kEwelinkPasswordStorage);
+    String _ewelinkPassword = prefs.getString(kEwelinkPasswordStorage);
     if (_ewelinkEmail != null && _ewelinkPassword != null) {
       Navigator.pushReplacementNamed(
         context,
