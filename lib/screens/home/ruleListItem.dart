@@ -1,24 +1,26 @@
+import 'package:Arrive/models/geofenceRule.dart';
 import 'package:Arrive/models/place.dart';
 import 'package:Arrive/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class PlaceListItem extends StatefulWidget {
-  final Place place;
-  final deletePlace;
-  PlaceListItem(this.place, this.deletePlace);
+class RuleListItem extends StatefulWidget {
+  final GeofenceRule rule;
+  final deleteRule;
+  RuleListItem(this.rule, this.deleteRule);
 
   @override
-  _PlaceListItemState createState() => _PlaceListItemState(place, deletePlace);
+  _RuleListItemState createState() => _RuleListItemState(rule, deleteRule);
 }
 
-class _PlaceListItemState extends State<PlaceListItem> {
-  final Place place;
-  final deletePlace;
-  _PlaceListItemState(this.place, this.deletePlace);
+class _RuleListItemState extends State<RuleListItem> {
+  final GeofenceRule rule;
+  final deleteRule;
+  _RuleListItemState(this.rule, this.deleteRule);
 
   @override
   Widget build(BuildContext context) {
+    TextStyle _normalStyle = TextStyle(color: kBoldFontColor);
     return Container(
         padding: EdgeInsets.all(5),
         child: Column(
@@ -40,22 +42,12 @@ class _PlaceListItemState extends State<PlaceListItem> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(
-                        place.name,
-                        style: TextStyle(
-                          fontFamily: 'Pacifico',
-                          fontSize: 20,
-                          color: kBoldFontColor,
-                        ),
-                      ),
-                      Text('latitude: ${place.latitude}',
-                          style: TextStyle(
-                            color: kBoldFontColor,
-                          )),
-                      Text('longitude: ${place.longitude}',
-                          style: TextStyle(
-                            color: kBoldFontColor,
-                          )),
+                      Text('Place: ${rule.place.name}', style: _normalStyle),
+                      Text('Geofence trigger: ${rule.event}', style: _normalStyle),
+                      Text('Device: ${rule.device.name}', style: _normalStyle),
+                      Text('Action: ${rule.action}', style: _normalStyle),
+                      Text('Status: ${rule.active ? 'active' : 'inactive'}', style: _normalStyle),
+                      Text('Recurrence: ${rule.persistAfterAction ? 'repeating' : 'one time'}', style: _normalStyle),
                     ],
                   ),
                   Expanded(
@@ -69,7 +61,7 @@ class _PlaceListItemState extends State<PlaceListItem> {
                             textColor: kDangerColor,
                             color: kLightAccentColor,
                             child: Icon(Icons.delete),
-                            onPressed: () => {deletePlace(place)},
+                            onPressed: () => {deleteRule(rule)},
                           ),
                         ),
                       ],

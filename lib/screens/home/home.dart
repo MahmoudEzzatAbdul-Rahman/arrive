@@ -1,5 +1,9 @@
+import 'package:Arrive/components/confirmdialogue.dart';
 import 'package:Arrive/components/sidedrawer.dart';
 import 'package:Arrive/models/ewelinkdevice.dart';
+import 'package:Arrive/models/geofenceRule.dart';
+import 'package:Arrive/screens/home/addGeofenceRule.dart';
+import 'package:Arrive/screens/home/ruleListItem.dart';
 import 'package:Arrive/utils/colors.dart';
 import 'package:Arrive/utils/ewelinkapi.dart';
 import 'package:Arrive/utils/geofence.dart';
@@ -21,8 +25,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String ewelinkEmail;
-  String ewelinkPassword;
+  GeofenceRules rulesList = new GeofenceRules();
 
   bool gateSelected = false;
   bool lightSelected = false;
@@ -36,15 +39,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void getSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    String gs = prefs.getString(kGeofenceRulesStorageKey);
+    String userEmail = prefs.getString(kEwelinkEmailStorage);
+    setState(() {
+      if (gs != null) rulesList = GeofenceRules.fromString(gs);
+      rulesList.rules = rulesList.rules.where((item) => item.userEmail == userEmail).toList();
+      print(rulesList);
+    });
 
+    // legacy content
     bool gate = prefs.getBool("gateSelected");
     bool lights = prefs.getBool("lightSelected");
-    print('gate and lights $gate $lights');
+//    print('gate and lights $gate $lights');
     setState(() {
       if (gate) gateSelected = true;
       if (lights) lightSelected = true;
     });
     setGeofenceState(gate || lights);
+  }
+
+  void deleteRule(GeofenceRule rule) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    BlurryDialog alert = BlurryDialog(
+      "",
+      "Are you sure you want to delete this action?",
+      "Delete",
+      () {
+        setState(() {
+          rulesList.rules.removeWhere((element) => element.id == rule.id);
+          prefs.setString(kGeofenceRulesStorageKey, rulesList.toString());
+        });
+      },
+    );
+
+    showDialog(context: context, builder: (BuildContext context) => alert);
   }
 
   void setGeofenceState(bool state) {
@@ -96,6 +124,10 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
+                Column(children: rulesList.rules.map((item) => RuleListItem(item, deleteRule)).toList()),
+                SizedBox(
+                  height: 40,
+                ),
                 Container(
                   padding: EdgeInsets.all(5),
                   child: Column(
@@ -184,6 +216,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: kPrimaryColor,
+        child: Icon(Icons.add),
+        onPressed: () async {
+          final result = await Navigator.pushNamed(context, AddGeofenceRuleScreen.routeName);
+          if (result != null) getSettings();
+        },
       ),
     );
   }

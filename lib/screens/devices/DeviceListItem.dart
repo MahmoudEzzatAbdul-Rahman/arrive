@@ -45,8 +45,9 @@ class _DeviceListItemState extends State<DeviceListItem> {
             Container(
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
+                color: kLightAccentColor,
                 border: Border.all(
-                  color: kPrimaryColor,
+                  color: kLightAccentColor,
                 ),
                 borderRadius: BorderRadius.all(
                   Radius.circular(5),

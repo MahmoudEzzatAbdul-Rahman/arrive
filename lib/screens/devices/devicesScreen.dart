@@ -1,7 +1,10 @@
 import 'package:Arrive/models/ewelinkdevice.dart';
+import 'package:Arrive/utils/constants.dart';
+import 'package:Arrive/utils/customToast.dart';
 import 'package:Arrive/utils/ewelinkapi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'DeviceListItem.dart';
 
 class DevicesScreen extends StatefulWidget {
@@ -12,7 +15,7 @@ class DevicesScreen extends StatefulWidget {
 
 class _DevicesScreenState extends State<DevicesScreen> {
   bool _loadingDevices = true;
-  List<EwelinkDevice> deviceList = [];
+  EwelinkDevices devicesList = new EwelinkDevices();
 
   @override
   void initState() {
@@ -21,7 +24,12 @@ class _DevicesScreenState extends State<DevicesScreen> {
   }
 
   void getDevices() async {
-    deviceList = [];
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String ewelinkEmail = prefs.getString(kEwelinkEmailStorage);
+    if (ewelinkEmail == null) {
+      CustomToast.showError("Unexpected behaviour, not logged in to ewelink");
+      return;
+    }
     var response = await EwelinkAPI.post({'requestMethod': 'getDevices'});
 //    print("ewelink get devices response::: ${response}");
     int i = 0;
@@ -29,9 +37,12 @@ class _DevicesScreenState extends State<DevicesScreen> {
     while (true) {
       iterator = response[i.toString()];
       if (iterator == null) break;
-      deviceList.add(EwelinkDevice.fromJson(iterator));
+      iterator["userEmail"] = ewelinkEmail;
+      devicesList.devices.add(EwelinkDevice.fromJson(iterator));
       i++;
     }
+    devicesList.devices = devicesList.devices.where((item) => item.online).toList();
+    prefs.setString(kEwelinkDevicesStorage, devicesList.toString());
     setState(() {
       _loadingDevices = false;
     });
@@ -55,7 +66,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                 _loadingDevices
                     ? CircularProgressIndicator()
                     : Column(
-                        children: deviceList.where((item) => item.online).map((item) => DeviceListItem(item)).toList(),
+                        children: devicesList.devices.map((item) => DeviceListItem(item)).toList(),
                       ),
               ],
             ),

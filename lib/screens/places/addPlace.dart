@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:Arrive/models/place.dart';
 import 'package:Arrive/utils/colors.dart';
@@ -67,7 +66,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       places.items.add(place);
       prefs.setString(kPlacesStorageKey, places.toString());
 
-      await GeofenceUtilities.addGeofence(place);
+//      await GeofenceUtilities.addGeofence(place); // do this on adding a geofence rule instead
       CustomToast.showSuccess('Added successfully');
       Navigator.pop(context, place);
     }
@@ -139,7 +138,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                       width: 60,
                       child: RaisedButton(
                         child: Icon(Icons.gps_fixed),
-                        color: kBackgroundColor,
+                        color: kLightAccentColor,
                         textColor: kBoldFontColor,
                         onPressed: () async {
                           print('getting current location');

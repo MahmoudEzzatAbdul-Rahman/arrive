@@ -1,5 +1,6 @@
 import 'package:Arrive/screens/devices/devicesScreen.dart';
 import 'package:Arrive/screens/entry.dart';
+import 'package:Arrive/screens/home/addGeofenceRule.dart';
 import 'package:Arrive/screens/home/home.dart';
 import 'package:Arrive/screens/login.dart';
 import 'package:Arrive/screens/places/addPlace.dart';
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
         DevicesScreen.routeName: (_) => DevicesScreen(),
         PlacesScreen.routeName: (_) => PlacesScreen(),
         AddPlaceScreen.routeName: (_) => AddPlaceScreen(),
+        AddGeofenceRuleScreen.routeName: (_) => AddGeofenceRuleScreen(),
       },
     );
   }

@@ -15,5 +15,6 @@ double kHomeLongitude = double.parse(DotEnv().env['HomeLongitude']);
 
 const String kEwelinkEmailStorage = 'ewelinkEmail';
 const String kEwelinkPasswordStorage = 'ewelinkPassword';
+const String kEwelinkDevicesStorage = 'ewelinkDevices';
 const String kPlacesStorageKey = 'places';
 const String kGeofenceRulesStorageKey = 'geofenceRules';

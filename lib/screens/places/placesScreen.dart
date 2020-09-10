@@ -15,7 +15,6 @@ class PlacesScreen extends StatefulWidget {
 }
 
 class _PlacesScreenState extends State<PlacesScreen> {
-  bool _loadingPlaces = true;
   Places places = new Places();
 
   @override
@@ -25,17 +24,15 @@ class _PlacesScreenState extends State<PlacesScreen> {
   }
 
   void getPlaces() async {
-    setState(() {
-      _loadingPlaces = true;
-    });
-//    print('my places ${places}');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String ps = prefs.getString(kPlacesStorageKey);
     String userEmail = prefs.getString(kEwelinkEmailStorage);
-    if (ps != null) places = Places.fromString(ps);
-    places.items = places.items.where((item) => item.userEmail == userEmail).toList();
     setState(() {
-      _loadingPlaces = false;
+      if (ps != null)
+        places = Places.fromString(ps);
+      else
+        places = new Places();
+      places.items = places.items.where((item) => item.userEmail == userEmail).toList();
     });
   }
 
@@ -43,7 +40,7 @@ class _PlacesScreenState extends State<PlacesScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     BlurryDialog alert = BlurryDialog(
       "",
-      "Are you sure you want to delete this place?",
+      "Are you sure you want to delete this place? This will delete geofence rules for this place as well.",
       "Delete",
       () {
         setState(() {
@@ -71,11 +68,9 @@ class _PlacesScreenState extends State<PlacesScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                _loadingPlaces
-                    ? CircularProgressIndicator()
-                    : Column(
-                        children: places.items.map((item) => PlaceListItem(item, deletePlace)).toList(),
-                      ),
+                Column(
+                  children: places.items.map((item) => PlaceListItem(item, deletePlace)).toList(),
+                ),
               ],
             ),
           ),
