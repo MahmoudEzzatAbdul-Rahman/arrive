@@ -138,7 +138,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                       width: 60,
                       child: RaisedButton(
                         child: Icon(Icons.gps_fixed),
-                        color: kLightAccentColor,
+                        color: kBackgroundColor,
                         textColor: kBoldFontColor,
                         onPressed: () async {
                           print('getting current location');

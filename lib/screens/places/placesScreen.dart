@@ -97,7 +97,7 @@ class _PlacesScreenState extends State<PlacesScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: kPrimaryColor,
+        backgroundColor: kAddButtonLightColor,
         child: Icon(Icons.add),
         onPressed: () async {
           final result = await Navigator.pushNamed(context, AddPlaceScreen.routeName);

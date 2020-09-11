@@ -48,8 +48,8 @@ class _RuleListItemState extends State<RuleListItem> {
                           Text('Status: ${rule.active ? 'active' : 'inactive'}', style: kNormalTextStyle),
                           Switch(
                             value: rule.active,
-                            activeTrackColor: kPrimaryColor,
-                            activeColor: kBoldFontColor,
+                            activeTrackColor: kAddButtonLightColor,
+                            activeColor: kAddButtonDarkColor,
                             onChanged: (val) async {
                               if (val) {
                                 var localAuth = LocalAuthentication();
@@ -96,9 +96,9 @@ class _RuleListItemState extends State<RuleListItem> {
                         Container(
                           width: 60,
                           child: RaisedButton(
-                            textColor: kDangerColor,
-                            color: kLightAccentColor,
-                            child: Icon(Icons.delete),
+                            textColor: kDeleteButtonColor,
+                            color: kBackgroundColor,
+                            child: Icon(Icons.cancel),
                             onPressed: () => {deleteRule(rule)},
                           ),
                         ),

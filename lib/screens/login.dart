@@ -79,13 +79,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(
-                height: 100,
+                height: 70,
               ),
               Text(
                 'Login to ewelink',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontFamily: 'Pacifico',
+//                  fontFamily: 'Pacifico',
                   fontSize: 25,
                   color: kPrimaryColor,
                 ),
@@ -109,7 +109,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           return 'Please enter a valid email';
                         else
                           return null;
-                        return null;
                       },
                     ),
                   ),
@@ -133,8 +132,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: 50,
                         padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                         child: RaisedButton(
-                          textColor: Colors.white,
-                          color: Colors.teal,
+                          textColor: kButtonTextColor,
+                          color: kPrimaryColor,
                           child: Text(_isLoading ? 'Logging in' : 'Login'),
                           onPressed: () {
                             if (_formKey.currentState.validate()) {

@@ -249,7 +249,7 @@ class HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: kPrimaryColor,
+        backgroundColor: kAddButtonLightColor,
         child: Icon(Icons.add),
         onPressed: () async {
           final result = await Navigator.pushNamed(context, AddGeofenceRuleScreen.routeName);
