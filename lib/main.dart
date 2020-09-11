@@ -20,6 +20,8 @@ void main() async {
   runApp(MyApp());
 }
 
+GlobalKey<HomeScreenState> homeScreenKey = GlobalKey<HomeScreenState>();
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -30,7 +32,7 @@ class MyApp extends StatelessWidget {
       routes: {
         EntryScreen.routeName: (_) => EntryScreen(),
         LoginScreen.routeName: (_) => LoginScreen(),
-        HomeScreen.routeName: (_) => HomeScreen(),
+        HomeScreen.routeName: (_) => HomeScreen(key: homeScreenKey),
         DevicesScreen.routeName: (_) => DevicesScreen(),
         PlacesScreen.routeName: (_) => PlacesScreen(),
         AddPlaceScreen.routeName: (_) => AddPlaceScreen(),

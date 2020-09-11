@@ -23,11 +23,14 @@ class SideDrawer extends StatelessWidget {
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+//                  Navigator.pushReplacementNamed(context, HomeScreen.routeName); // doesn't work well with global keys
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) => HomeScreen(),
+                  ));
                 },
               ),
               ListTile(
-                leading: Icon(Icons.settings_applications),
+                leading: Icon(Icons.bubble_chart),
                 title: Text(
                   "Devices",
                 ),
@@ -44,6 +47,16 @@ class SideDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.pushNamed(context, PlacesScreen.routeName);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.help),
+                title: Text(
+                  "How to use",
+                ),
+                onTap: () {
+//                  Navigator.pop(context);
+//                  Navigator.pushNamed(context, HowToUseScreen.routeName);
                 },
               ),
               Expanded(

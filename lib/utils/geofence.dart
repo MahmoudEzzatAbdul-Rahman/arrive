@@ -1,9 +1,8 @@
-import 'dart:convert';
+import 'package:Arrive/models/geofenceRule.dart';
 import 'package:Arrive/models/place.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart';
-import 'package:http/http.dart' as http;
 
 import 'constants.dart';
 import 'ewelinkapi.dart';
@@ -15,7 +14,8 @@ void backgroundGeofenceHeadlessTask(HeadlessEvent headlessEvent) async {
     case Event.GEOFENCE:
       GeofenceEvent geofenceEvent = headlessEvent.event;
       await DotEnv().load('.env');
-      if (geofenceEvent.action == 'ENTER' && geofenceEvent.identifier == kHomeLocationId) doGeofenceActions();
+      doGeofenceActions(geofenceEvent.action, geofenceEvent.identifier);
+//      if (geofenceEvent.action == 'ENTER' && geofenceEvent.identifier == kHomeLocationId) doGeofenceActions();
 //      LocalNotifications.send("Arrive", "${geofenceEvent.action} ${geofenceEvent.identifier}");
 //      GeofenceUtilities.notifyGeofenceEvent(geofenceEvent.action, geofenceEvent.identifier, message: "BG Geofence");
       print(geofenceEvent);
@@ -23,8 +23,10 @@ void backgroundGeofenceHeadlessTask(HeadlessEvent headlessEvent) async {
   }
 }
 
-void doGeofenceActions() async {
+void doGeofenceActions(String event, String identifier) async {
+  print('Arrived, geofence event $event id is $identifier');
 //  LocalNotifications.send("Arrive", "Arrived home, doing geofence actions");
+  List<String> deviceIdsToToggle = [];
   List<String> devicesToToggle = [];
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.reload();
@@ -35,18 +37,25 @@ void doGeofenceActions() async {
     return;
   }
 
-  bool gate = prefs.getBool("gateSelected");
-  bool lights = prefs.getBool("lightSelected");
-  if (gate) devicesToToggle.add(kGarageGateDeviceId);
-  if (lights) devicesToToggle.add(kGarageLightsDeviceId);
+  GeofenceRules rulesList = new GeofenceRules();
+  String gs = prefs.getString(kGeofenceRulesStorageKey);
+  if (gs != null) rulesList = GeofenceRules.fromString(gs);
+  rulesList.rules = rulesList.rules.where((item) => item.userEmail == _ewelinkEmail).toList();
+  GeofenceRules rulesListForEvent = new GeofenceRules(rules: rulesList.rules.where((item) => item.active && item.event == event && item.place.id == identifier).toList());
+  print('filtered rules ${rulesListForEvent.rules}');
+  rulesListForEvent.rules.forEach((rule) {
+    devicesToToggle.add(rule.device.name);
+    if (rule.device.deviceId != null) deviceIdsToToggle.add(rule.device.deviceId);
+    if (!rule.persistAfterAction) rule.active = false;
+  });
+  await prefs.setString(kGeofenceRulesStorageKey, rulesList.toString());
+  GeofenceUtilities.checkGeofenceRules(doNotEnableService: true);
 
-  print('devices to toggle $devicesToToggle $gate $lights');
-  if (devicesToToggle.length > 0)
-    LocalNotifications.send("Arrive", "Arrived home, devices to toggle $devicesToToggle");
-  else
-    LocalNotifications.send("Arrive", "Unexpected behaviour, toggling nothing");
+  if (deviceIdsToToggle.length > 0) LocalNotifications.send("Arrive", "Arrived home, devices to toggle $devicesToToggle");
+//  else
+//    LocalNotifications.send("Arrive", "Unexpected behaviour, toggling nothing");
 
-  devicesToToggle.forEach((element) async {
+  deviceIdsToToggle.forEach((element) async {
     try {
       print('toggling device $element');
       var responseBody = await EwelinkAPI.post({
@@ -55,21 +64,15 @@ void doGeofenceActions() async {
       });
       print("toggle response::: $responseBody");
       LocalNotifications.send("Arrive", "Backend response $responseBody");
-      await prefs.setBool('gateSelected', false);
-      await prefs.setBool('lightSelected', false);
-      BackgroundGeolocation.stop();
     } catch (err) {
       print(err);
       LocalNotifications.send("Arrive", "Backend error $err");
-      await prefs.setBool('gateSelected', false);
-      await prefs.setBool('lightSelected', false);
-      BackgroundGeolocation.stop();
     }
   });
 }
 
 class GeofenceUtilities {
-  static void startGeofenceService() async {
+  static void startGeofenceService({List<Place> toAdd}) async {
     BackgroundGeolocation.onGeofence((GeofenceEvent event) {
       print('[Geofence event] - ${event.toString()}');
       // Not firing from here, because opening the app at home triggers it!
@@ -87,15 +90,62 @@ class GeofenceUtilities {
       geofenceModeHighAccuracy: true,
       stopTimeout: 1,
       logLevel: Config.LOG_LEVEL_OFF, // LOG_LEVEL_OFF, LOG_LEVEL_VERBOSE
-    )).then((State state) {
+    )).then((State state) async {
       if (!state.enabled) {
-        BackgroundGeolocation.startGeofences();
+        await BackgroundGeolocation.startGeofences();
+        if (toAdd.length > 0) print('adding geofence $toAdd');
+        if (toAdd.length > 0) await addGeofences(toAdd.map(parsePlaceToGeofence).toList());
       }
     });
   }
 
   static void stopGeofenceService() async {
     BackgroundGeolocation.stop();
+  }
+
+  static Future<bool> checkGeofenceRules({bool doNotEnableService = false /* when called from headless */}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    GeofenceRules rulesList = new GeofenceRules();
+    String gs = prefs.getString(kGeofenceRulesStorageKey);
+    String userEmail = prefs.getString(kEwelinkEmailStorage);
+    if (userEmail == null) {
+      stopGeofenceService();
+      return false;
+    }
+    if (gs != null) rulesList = GeofenceRules.fromString(gs);
+    rulesList.rules = rulesList.rules.where((item) => item.userEmail == userEmail).toList();
+
+    List<Geofence> geofences = await BackgroundGeolocation.geofences;
+    var registeredGeofences = geofences.map((Geofence goefence) => goefence.identifier);
+    List<Place> toAdd = [];
+
+    bool atLeastOneRuleIsActive = false;
+    List<String> validPlacesIds = [];
+    rulesList.rules.forEach((rule) {
+      if (rule.active) {
+        atLeastOneRuleIsActive = true;
+        if (!validPlacesIds.contains(rule.place.id)) {
+          if (!registeredGeofences.contains(rule.place.id)) {
+            toAdd.add(rule.place);
+          }
+          validPlacesIds.add(rule.place.id);
+        }
+      }
+    });
+//    if (toAdd.length > 0) await addGeofences(toAdd.map(parsePlaceToGeofence).toList()); // doing this after starting the service
+    registeredGeofences.forEach((element) async {
+      if (!validPlacesIds.contains(element)) {
+        removeGeofence(element);
+      }
+    });
+    if (atLeastOneRuleIsActive && !doNotEnableService)
+      startGeofenceService(toAdd: toAdd);
+    else if (!atLeastOneRuleIsActive) {
+      stopGeofenceService();
+      print('stopping geo service!');
+    }
+    return atLeastOneRuleIsActive;
   }
 
   static Future<Location> getCurrentLocation() async {
@@ -111,14 +161,7 @@ class GeofenceUtilities {
   }
 
   static Future<dynamic> addGeofence(Place place) async {
-    return BackgroundGeolocation.addGeofence(new Geofence(
-      identifier: place.id,
-      latitude: place.latitude,
-      longitude: place.longitude,
-      radius: kGeofenceRadius,
-      notifyOnEntry: true,
-      notifyOnExit: true,
-    ));
+    return BackgroundGeolocation.addGeofence(parsePlaceToGeofence(place));
   }
 
   static Future<dynamic> removeGeofence(String locationId) async {
@@ -129,8 +172,23 @@ class GeofenceUtilities {
     return BackgroundGeolocation.removeGeofences();
   }
 
+  static Future<dynamic> getAllGeofences() async {
+    return BackgroundGeolocation.geofences;
+  }
+
   static Geofence parseGeofence(dynamic location) {
     return new Geofence(identifier: location["_id"], latitude: location["latitude"], longitude: location["longitude"], radius: kGeofenceRadius, notifyOnEntry: true, notifyOnExit: true);
+  }
+
+  static Geofence parsePlaceToGeofence(Place place) {
+    return new Geofence(
+      identifier: place.id,
+      latitude: place.latitude,
+      longitude: place.longitude,
+      radius: kGeofenceRadius,
+      notifyOnEntry: true,
+      notifyOnExit: true,
+    );
   }
 
 //  static Future<dynamic> getUserLocations() async {

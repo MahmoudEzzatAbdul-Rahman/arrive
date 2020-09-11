@@ -1,9 +1,10 @@
+import 'package:Arrive/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class CustomToast {
   static const toastLength = Toast.LENGTH_SHORT;
-  static const gravity = ToastGravity.CENTER;
+  static const gravity = ToastGravity.BOTTOM;
   static const timeInSecForIosWeb = 2;
   static const textColor = Colors.white;
   static const fontSize = 16.0;
@@ -14,7 +15,7 @@ class CustomToast {
       toastLength: toastLength,
       gravity: gravity,
       timeInSecForIosWeb: timeInSecForIosWeb,
-      backgroundColor: Colors.red,
+      backgroundColor: kDangerColor,
       textColor: textColor,
       fontSize: fontSize,
     );
@@ -26,7 +27,7 @@ class CustomToast {
       toastLength: toastLength,
       gravity: gravity,
       timeInSecForIosWeb: timeInSecForIosWeb,
-      backgroundColor: Colors.green,
+      backgroundColor: kPrimaryColor,
       textColor: textColor,
       fontSize: fontSize,
     );

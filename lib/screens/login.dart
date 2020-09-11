@@ -54,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLightAccentColor,
+      backgroundColor: kBackgroundColor,
       body: SafeArea(
         child: Container(
           child: Column(
@@ -87,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(
                   fontFamily: 'Pacifico',
                   fontSize: 25,
-                  color: kBoldFontColor,
+                  color: kPrimaryColor,
                 ),
               ),
               Form(

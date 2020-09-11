@@ -8,6 +8,7 @@ import 'package:Arrive/utils/geofence.dart';
 import 'package:Arrive/utils/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
@@ -51,6 +52,10 @@ class _AddGeofenceRuleScreenState extends State<AddGeofenceRuleScreen> {
     bool _selectedpersistAfterAction = false;
 
     void addGeofenceRule() async {
+      var localAuth = LocalAuthentication();
+      bool didAuthenticate = await localAuth.authenticateWithBiometrics(localizedReason: 'Please authenticate to add');
+      if (!didAuthenticate) return;
+
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
       String gs = prefs.getString(kGeofenceRulesStorageKey);
@@ -75,9 +80,8 @@ class _AddGeofenceRuleScreenState extends State<AddGeofenceRuleScreen> {
       );
       print('adding rule $rule');
       rulesList.rules.add(rule);
-      prefs.setString(kGeofenceRulesStorageKey, rulesList.toString());
-
-      await GeofenceUtilities.addGeofence(rule.place);
+      await prefs.setString(kGeofenceRulesStorageKey, rulesList.toString());
+      GeofenceUtilities.checkGeofenceRules();
       CustomToast.showSuccess('Added successfully');
       Navigator.pop(context, rule);
     }

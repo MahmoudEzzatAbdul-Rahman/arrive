@@ -1,3 +1,4 @@
+import 'package:Arrive/components/styles.dart';
 import 'package:Arrive/models/ewelinkdevice.dart';
 import 'package:Arrive/utils/colors.dart';
 import 'package:Arrive/utils/ewelinkapi.dart';
@@ -6,15 +7,17 @@ import 'package:flutter/material.dart';
 
 class DeviceListItem extends StatefulWidget {
   final EwelinkDevice device;
-  DeviceListItem(this.device);
+  final ObjectKey key;
+  DeviceListItem(this.device, this.key);
 
   @override
-  _DeviceListItemState createState() => _DeviceListItemState(device);
+  _DeviceListItemState createState() => _DeviceListItemState(device, key);
 }
 
 class _DeviceListItemState extends State<DeviceListItem> {
   final EwelinkDevice device;
-  _DeviceListItemState(this.device);
+  final ObjectKey key;
+  _DeviceListItemState(this.device, this.key);
   bool _changingDeviceState = false;
 
   void toggleDevice() async {
@@ -44,15 +47,7 @@ class _DeviceListItemState extends State<DeviceListItem> {
           children: [
             Container(
               padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: kLightAccentColor,
-                border: Border.all(
-                  color: kLightAccentColor,
-                ),
-                borderRadius: BorderRadius.all(
-                  Radius.circular(5),
-                ),
-              ),
+              decoration: kListItemBoxDecoration,
               child: Row(
                 children: [
                   Column(
@@ -63,7 +58,7 @@ class _DeviceListItemState extends State<DeviceListItem> {
                         style: TextStyle(
                           fontFamily: 'Pacifico',
                           fontSize: 20,
-                          color: kBoldFontColor,
+                          color: kPrimaryColor,
                         ),
                       ),
 //                      Text('State: ${widget.device.state}'),

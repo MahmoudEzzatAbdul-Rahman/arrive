@@ -1,9 +1,13 @@
 import 'package:Arrive/components/confirmdialogue.dart';
+import 'package:Arrive/components/styles.dart';
+import 'package:Arrive/main.dart';
+import 'package:Arrive/models/geofenceRule.dart';
 import 'package:Arrive/models/place.dart';
 import 'package:Arrive/screens/places/addPlace.dart';
 import 'package:Arrive/screens/places/placeListItem.dart';
 import 'package:Arrive/utils/colors.dart';
 import 'package:Arrive/utils/constants.dart';
+import 'package:Arrive/utils/geofence.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,12 +44,20 @@ class _PlacesScreenState extends State<PlacesScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     BlurryDialog alert = BlurryDialog(
       "",
-      "Are you sure you want to delete this place? This will delete geofence rules for this place as well.",
+      "Are you sure you want to delete this place? This will delete actions for this place as well.",
       "Delete",
-      () {
+      () async {
+        places.items.removeWhere((element) => element.id == place.id);
+        prefs.setString(kPlacesStorageKey, places.toString());
+        GeofenceRules rulesList = new GeofenceRules();
+        String gs = prefs.getString(kGeofenceRulesStorageKey);
+        if (gs != null) rulesList = GeofenceRules.fromString(gs);
+        rulesList.rules.removeWhere((element) => element.place.id == place.id);
+        await prefs.setString(kGeofenceRulesStorageKey, rulesList.toString());
+        GeofenceUtilities.checkGeofenceRules();
+        homeScreenKey.currentState.getSettings();
         setState(() {
-          places.items.removeWhere((element) => element.id == place.id);
-          prefs.setString(kPlacesStorageKey, places.toString());
+          places.items = places.items;
         });
       },
     );
@@ -63,13 +75,21 @@ class _PlacesScreenState extends State<PlacesScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 0),
+          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Column(
-                  children: places.items.map((item) => PlaceListItem(item, deletePlace)).toList(),
+                  children: places.items.length == 0
+                      ? [
+                          SizedBox(height: 10),
+                          Text(
+                            'You can add places of interest and add actions to them, click on the + button',
+                            style: kNormalTextStyle,
+                          )
+                        ]
+                      : places.items.map((item) => PlaceListItem(item, deletePlace, ObjectKey(item.id))).toList(),
                 ),
               ],
             ),

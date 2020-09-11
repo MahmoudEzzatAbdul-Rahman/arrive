@@ -8,12 +8,6 @@ Initially I'm supporting garage gate and garage lights toggle, could add more in
 please structure your .env file as:
 
 ```bash
-GarageGateDeviceId=<some_id>
-GarageLightsDeviceId=<other_id>
 EwelinkEndpoint=<cloud_function_endpoint>
 LambdaAPIKey=<cloud_function_api_key>
-
-HomeLocationId=<home location id (random string)>
-HomeLatitude=<home location latitude>
-HomeLongitude=<home location longitude>
 ```

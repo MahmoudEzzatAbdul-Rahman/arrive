@@ -24,7 +24,7 @@ class EwelinkDevice {
 
   Map<String, dynamic> toJson() => {
         "name": name,
-        "deviceId": deviceId,
+        "deviceid": deviceId,
         "userEmail": userEmail,
         "state": state,
       };

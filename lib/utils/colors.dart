@@ -5,4 +5,4 @@ const Color kBackgroundColor = Colors.white;
 Color kLightAccentColor = Colors.teal[50];
 Color kBoldFontColor = Colors.teal[900];
 Color kButtonTextColor = Colors.white;
-Color kDangerColor = Colors.red[900];
+Color kDangerColor = Color.fromRGBO(130, 9, 0, 1);

@@ -1,3 +1,4 @@
+import 'package:Arrive/components/styles.dart';
 import 'package:Arrive/models/place.dart';
 import 'package:Arrive/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,16 +7,18 @@ import 'package:flutter/material.dart';
 class PlaceListItem extends StatefulWidget {
   final Place place;
   final deletePlace;
-  PlaceListItem(this.place, this.deletePlace);
+  final ObjectKey key;
+  PlaceListItem(this.place, this.deletePlace, this.key);
 
   @override
-  _PlaceListItemState createState() => _PlaceListItemState(place, deletePlace);
+  _PlaceListItemState createState() => _PlaceListItemState(place, deletePlace, key);
 }
 
 class _PlaceListItemState extends State<PlaceListItem> {
   final Place place;
   final deletePlace;
-  _PlaceListItemState(this.place, this.deletePlace);
+  final ObjectKey key;
+  _PlaceListItemState(this.place, this.deletePlace, this.key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,15 +29,7 @@ class _PlaceListItemState extends State<PlaceListItem> {
           children: [
             Container(
               padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: kLightAccentColor,
-                border: Border.all(
-                  color: kPrimaryColor,
-                ),
-                borderRadius: BorderRadius.all(
-                  Radius.circular(5),
-                ),
-              ),
+              decoration: kListItemBoxDecoration,
               child: Row(
                 children: [
                   Column(
@@ -45,17 +40,11 @@ class _PlaceListItemState extends State<PlaceListItem> {
                         style: TextStyle(
                           fontFamily: 'Pacifico',
                           fontSize: 20,
-                          color: kBoldFontColor,
+                          color: kPrimaryColor,
                         ),
                       ),
-                      Text('latitude: ${place.latitude}',
-                          style: TextStyle(
-                            color: kBoldFontColor,
-                          )),
-                      Text('longitude: ${place.longitude}',
-                          style: TextStyle(
-                            color: kBoldFontColor,
-                          )),
+                      Text('latitude: ${place.latitude}', style: kNormalTextStyle),
+                      Text('longitude: ${place.longitude}', style: kNormalTextStyle),
                     ],
                   ),
                   Expanded(

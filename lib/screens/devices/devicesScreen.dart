@@ -1,3 +1,4 @@
+import 'package:Arrive/components/styles.dart';
 import 'package:Arrive/models/ewelinkdevice.dart';
 import 'package:Arrive/utils/constants.dart';
 import 'package:Arrive/utils/customToast.dart';
@@ -58,7 +59,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 0),
+          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -66,7 +67,15 @@ class _DevicesScreenState extends State<DevicesScreen> {
                 _loadingDevices
                     ? CircularProgressIndicator()
                     : Column(
-                        children: devicesList.devices.map((item) => DeviceListItem(item)).toList(),
+                        children: devicesList.devices.length == 0
+                            ? [
+                                SizedBox(height: 10),
+                                Text(
+                                  'Couldn\'t find ewelink devices',
+                                  style: kNormalTextStyle,
+                                )
+                              ]
+                            : devicesList.devices.map((item) => DeviceListItem(item, ObjectKey(item.deviceId))).toList(),
                       ),
               ],
             ),
