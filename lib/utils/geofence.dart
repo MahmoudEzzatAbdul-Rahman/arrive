@@ -24,9 +24,9 @@ void backgroundGeofenceHeadlessTask(HeadlessEvent headlessEvent) async {
 }
 
 void doGeofenceActions(String event, String identifier) async {
-  print('Arrived, geofence event $event id is $identifier');
+  print('Geofence event $event id is $identifier');
 //  LocalNotifications.send("Arrive", "Arrived home, doing geofence actions");
-  List<String> deviceIdsToToggle = [];
+//  List<String> deviceIdsToToggle = [];
   List<String> devicesToToggle = [];
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.reload();
@@ -44,15 +44,18 @@ void doGeofenceActions(String event, String identifier) async {
   GeofenceRules rulesListForEvent = new GeofenceRules(rules: rulesList.rules.where((item) => item.active && item.event == event && item.place.id == identifier).toList());
   print('filtered rules ${rulesListForEvent.rules}');
   rulesListForEvent.rules.forEach((rule) {
+//    if (rule.device.deviceId != null) deviceIdsToToggle.add(rule.device.deviceId);
     devicesToToggle.add(rule.device.name);
-    if (rule.device.deviceId != null) deviceIdsToToggle.add(rule.device.deviceId);
-
     if (!rule.persistAfterAction) rule.active = false;
   });
   await prefs.setString(kGeofenceRulesStorageKey, rulesList.toString());
   GeofenceUtilities.checkGeofenceRules(doNotEnableService: true);
 
-  if (deviceIdsToToggle.length > 0) LocalNotifications.send("Arrive", "Arrived home, devices to toggle $devicesToToggle");
+  if (rulesListForEvent.rules.length > 0)
+    LocalNotifications.send(
+      "Arrive",
+      "${event == 'ENTER' ? 'Arrived' : 'Left'} ${rulesListForEvent.rules[0].place.name}, devices to toggle $devicesToToggle",
+    );
 //  else
 //    LocalNotifications.send("Arrive", "Unexpected behaviour, toggling nothing");
 
