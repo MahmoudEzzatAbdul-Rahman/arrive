@@ -46,6 +46,7 @@ void doGeofenceActions(String event, String identifier) async {
   rulesListForEvent.rules.forEach((rule) {
     devicesToToggle.add(rule.device.name);
     if (rule.device.deviceId != null) deviceIdsToToggle.add(rule.device.deviceId);
+
     if (!rule.persistAfterAction) rule.active = false;
   });
   await prefs.setString(kGeofenceRulesStorageKey, rulesList.toString());
@@ -55,14 +56,27 @@ void doGeofenceActions(String event, String identifier) async {
 //  else
 //    LocalNotifications.send("Arrive", "Unexpected behaviour, toggling nothing");
 
-  deviceIdsToToggle.forEach((element) async {
+  rulesListForEvent.rules.forEach((rule) async {
     try {
-      print('toggling device $element');
+      String deviceId = rule.device.deviceId;
+      if (deviceId == null) return;
+      print('toggling device ${rule.device.name}');
       var responseBody = await EwelinkAPI.post({
         'requestMethod': 'toggleDevice',
-        "deviceId": element,
+        "deviceId": deviceId,
       });
       print("toggle response::: $responseBody");
+      if (responseBody["result"] == true && responseBody["status"] == 'ok') {
+        if (rule.secondToggle && rule.secondToggleTimeout > 0) {
+          await Future.delayed(Duration(seconds: rule.secondToggleTimeout));
+          print('toggling device ${rule.device.name} for the second time');
+          var secondResponseBody = await EwelinkAPI.post({
+            'requestMethod': 'toggleDevice',
+            "deviceId": deviceId,
+          });
+          print("toggle response::: $secondResponseBody");
+        }
+      }
       LocalNotifications.send("Arrive", "Backend response $responseBody");
     } catch (err) {
       print(err);
@@ -81,8 +95,9 @@ class GeofenceUtilities {
       // GeofenceUtilities.notifyGeofenceEvent(event.action, event.identifier, message: "HS Geofence");
     });
     BackgroundGeolocation.ready(Config(
+      notification: Notification(smallIcon: '@drawable/ic_stat_a'),
       desiredAccuracy: Config.DESIRED_ACCURACY_MEDIUM,
-      distanceFilter: 30,
+//      distanceFilter: 30,
       stopOnTerminate: false,
       startOnBoot: true,
       debug: false,
@@ -144,6 +159,7 @@ class GeofenceUtilities {
     else if (!atLeastOneRuleIsActive) {
       stopGeofenceService();
       print('stopping geo service!');
+//      LocalNotifications.send('Arrive', 'Stopping goefence service');
     }
     return atLeastOneRuleIsActive;
   }

@@ -12,13 +12,26 @@ class GeofenceRule {
   Place place;
   EwelinkDevice device;
 //  List<EwelinkDevice> devices; // might support later
-
-  bool active = true;
-  bool persistAfterAction = false; // keep the rule active after it's triggered (suitable for lights, not suitable for gates)
   String event; // ENTER, EXIT
   String action; // toggle
 
-  GeofenceRule(this.id, this.userEmail, this.place, this.device, this.event, this.action, {this.active = true, this.persistAfterAction = false});
+  bool active = true;
+  bool persistAfterAction = false; // keep the rule active after it's triggered (suitable for lights, not suitable for gates)
+  bool secondToggle = false;
+  int secondToggleTimeout = 0;
+
+  GeofenceRule(
+    this.id,
+    this.userEmail,
+    this.place,
+    this.device,
+    this.event,
+    this.action, {
+    this.active = true,
+    this.persistAfterAction = false,
+    this.secondToggle = false,
+    this.secondToggleTimeout = 0,
+  });
 
   factory GeofenceRule.fromString(String s) => GeofenceRule.fromJson(json.decode(s));
 
@@ -29,8 +42,10 @@ class GeofenceRule {
         EwelinkDevice.fromJson(json["device"]),
         json["event"],
         json["action"],
-        active: json["active"],
-        persistAfterAction: json["persistAfterAction"],
+        active: json["active"] ?? false,
+        persistAfterAction: json["persistAfterAction"] ?? false,
+        secondToggle: json["secondToggle"] ?? false,
+        secondToggleTimeout: json["secondToggleTimeout"] ?? 0,
       );
 
   Map<String, dynamic> toJson() => {
@@ -39,9 +54,11 @@ class GeofenceRule {
         "place": place.toJson(),
         "device": device.toJson(),
         "active": active,
+        "action": action,
         "persistAfterAction": persistAfterAction,
         "event": event,
-        "action": action,
+        "secondToggle": secondToggle,
+        "secondToggleTimeout": secondToggleTimeout,
       };
 
   String toString() => json.encode(toJson());

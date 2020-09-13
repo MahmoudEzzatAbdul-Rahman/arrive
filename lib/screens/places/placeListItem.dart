@@ -57,7 +57,7 @@ class _PlaceListItemState extends State<PlaceListItem> {
                           child: RaisedButton(
                             textColor: kDeleteButtonColor,
                             color: kBackgroundColor,
-                            child: Icon(Icons.cancel),
+                            child: Icon(Icons.close),
                             onPressed: () => {deletePlace(place)},
                           ),
                         ),

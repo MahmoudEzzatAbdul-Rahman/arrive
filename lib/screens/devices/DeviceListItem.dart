@@ -74,8 +74,8 @@ class _DeviceListItemState extends State<DeviceListItem> {
                             ? CircularProgressIndicator()
                             : Switch(
                                 value: widget.device.state == "on",
-                                activeTrackColor: kPrimaryColor,
-                                activeColor: kBoldFontColor,
+                                activeTrackColor: kAddButtonLightColor,
+                                activeColor: kAddButtonDarkColor,
                                 onChanged: (val) {
                                   toggleDevice();
                                 },

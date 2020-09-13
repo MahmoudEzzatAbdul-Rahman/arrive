@@ -4,6 +4,7 @@ import 'package:Arrive/models/place.dart';
 import 'package:Arrive/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 
 class RuleListItem extends StatefulWidget {
@@ -58,7 +59,10 @@ class _RuleListItemState extends State<RuleListItem> {
                               }
                               setState(() {
                                 rule.active = val;
-                                if (!val) rule.persistAfterAction = val;
+                                if (!val) {
+                                  rule.persistAfterAction = val;
+                                  rule.secondToggle = val;
+                                }
                                 editRule(rule);
                               });
                             },
@@ -70,8 +74,8 @@ class _RuleListItemState extends State<RuleListItem> {
                           Text('Recurrence: ${rule.persistAfterAction ? 'repeating' : 'one time'}', style: kNormalTextStyle),
                           Switch(
                             value: rule.persistAfterAction,
-                            activeTrackColor: kPrimaryColor,
-                            activeColor: kBoldFontColor,
+                            activeTrackColor: kAddButtonLightColor,
+                            activeColor: kAddButtonDarkColor,
                             onChanged: (val) async {
                               if (val) {
                                 var localAuth = LocalAuthentication();
@@ -87,6 +91,51 @@ class _RuleListItemState extends State<RuleListItem> {
                           ),
                         ],
                       ),
+                      Row(
+                        children: [
+                          Text('Re-do action after a delay: ${rule.secondToggle ? 'yes' : 'no'}', style: kNormalTextStyle),
+                          Switch(
+                            value: rule.secondToggle,
+                            activeTrackColor: kAddButtonLightColor,
+                            activeColor: kAddButtonDarkColor,
+                            onChanged: (val) async {
+                              if (val) {
+                                var localAuth = LocalAuthentication();
+                                bool didAuthenticate = await localAuth.authenticateWithBiometrics(localizedReason: 'Please authenticate to enable');
+                                if (!didAuthenticate) return;
+                              }
+                              setState(() {
+                                rule.secondToggle = val;
+                                if (val) rule.active = val;
+                                editRule(rule);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text('Delay in seconds:   ', style: kNormalTextStyle),
+                          Container(
+                              width: 50,
+                              child: TextFormField(
+//                                controller: _controller,
+                                decoration: InputDecoration(hintText: ''),
+                                keyboardType: TextInputType.number,
+                                initialValue: rule.secondToggleTimeout.toString(),
+                                inputFormatters: <TextInputFormatter>[WhitelistingTextInputFormatter.digitsOnly],
+                                onChanged: (val) async {
+                                  setState(() {
+                                    rule.secondToggleTimeout = int.parse(val);
+                                    if (int.parse(val) > 0) {
+                                      rule.secondToggle = true;
+                                    }
+                                    editRule(rule);
+                                  });
+                                },
+                              )),
+                        ],
+                      ),
                     ],
                   ),
                   Expanded(
@@ -98,7 +147,7 @@ class _RuleListItemState extends State<RuleListItem> {
                           child: RaisedButton(
                             textColor: kDeleteButtonColor,
                             color: kBackgroundColor,
-                            child: Icon(Icons.cancel),
+                            child: Icon(Icons.close),
                             onPressed: () => {deleteRule(rule)},
                           ),
                         ),

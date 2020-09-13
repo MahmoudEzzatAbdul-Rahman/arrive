@@ -50,6 +50,8 @@ class _AddGeofenceRuleScreenState extends State<AddGeofenceRuleScreen> {
     String _selectedEvent = 'ENTER';
     String _selectedAction = "toggle";
     bool _selectedpersistAfterAction = false;
+    bool _redoAction = false;
+    int _redoDelay = 0;
 
     void addGeofenceRule() async {
       var localAuth = LocalAuthentication();
@@ -77,6 +79,8 @@ class _AddGeofenceRuleScreenState extends State<AddGeofenceRuleScreen> {
         _selectedAction,
         active: true,
         persistAfterAction: _selectedpersistAfterAction,
+        secondToggle: _redoAction,
+        secondToggleTimeout: _redoDelay,
       );
       print('adding rule $rule');
       rulesList.rules.add(rule);
@@ -92,7 +96,7 @@ class _AddGeofenceRuleScreenState extends State<AddGeofenceRuleScreen> {
           "Add action",
         ),
       ),
-      body: Container(
+      body: SingleChildScrollView(
         padding: new EdgeInsets.symmetric(vertical: 0, horizontal: 10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -175,6 +179,32 @@ class _AddGeofenceRuleScreenState extends State<AddGeofenceRuleScreen> {
                                 _selectedpersistAfterAction = true;
                                 break;
                             }
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        DropdownSearch<String>(
+                          mode: Mode.MENU,
+                          label: "Re-do action after delay",
+                          items: ['no', 'yes'],
+                          selectedItem: "no",
+                          onChanged: (String d) {
+                            switch (d) {
+                              case 'no':
+                                _redoAction = false;
+                                break;
+                              case 'yes':
+                                _redoAction = true;
+                                break;
+                            }
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        DropdownSearch<String>(
+                          label: "Re-do action delay",
+                          items: ['0', '5', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55', '60'],
+                          selectedItem: "0",
+                          onChanged: (String val) {
+                            _redoDelay = int.parse(val);
                           },
                         ),
                       ],
