@@ -8,7 +8,7 @@ String kEwelinkEndpoint = DotEnv().env['EwelinkEndpoint'];
 String kLambdaAPIKey = DotEnv().env['LambdaAPIKey'];
 
 // default app settings
-const double kGeofenceRadius = 150;
+const double kGeofenceRadius = 200;
 
 // Shared preferences storage keys
 const String kEwelinkEmailStorage = 'ewelinkEmail';

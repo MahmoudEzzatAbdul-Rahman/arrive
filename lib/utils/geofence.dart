@@ -101,11 +101,13 @@ class GeofenceUtilities {
       notification: Notification(smallIcon: '@drawable/ic_stat_a'),
       desiredAccuracy: Config.DESIRED_ACCURACY_MEDIUM,
 //      distanceFilter: 30,
+      distanceFilter: 10.0,
       stopOnTerminate: false,
       startOnBoot: true,
       debug: false,
       enableHeadless: true,
       geofenceModeHighAccuracy: true,
+      geofenceInitialTriggerEntry: false,
       stopTimeout: 1,
       logLevel: Config.LOG_LEVEL_OFF, // LOG_LEVEL_OFF, LOG_LEVEL_VERBOSE
     )).then((State state) async {
