@@ -33,15 +33,21 @@ void doGeofenceActions(String event, String identifier) async {
   String _ewelinkEmail = prefs.getString(kEwelinkEmailStorage);
   String _ewelinkPassword = prefs.getString(kEwelinkPasswordStorage);
   if (_ewelinkEmail == null || _ewelinkPassword == null) {
-    LocalNotifications.send("Arrive", "Couldn't do geofence actions, missing ewelink credentials");
+    LocalNotifications.send(
+        "Arrive", "Couldn't do geofence actions, missing ewelink credentials");
     return;
   }
 
   GeofenceRules rulesList = new GeofenceRules();
   String gs = prefs.getString(kGeofenceRulesStorageKey);
   if (gs != null) rulesList = GeofenceRules.fromString(gs);
-  rulesList.rules = rulesList.rules.where((item) => item.userEmail == _ewelinkEmail).toList();
-  GeofenceRules rulesListForEvent = new GeofenceRules(rules: rulesList.rules.where((item) => item.active && item.event == event && item.place.id == identifier).toList());
+  rulesList.rules =
+      rulesList.rules.where((item) => item.userEmail == _ewelinkEmail).toList();
+  GeofenceRules rulesListForEvent = new GeofenceRules(
+      rules: rulesList.rules
+          .where((item) =>
+              item.active && item.event == event && item.place.id == identifier)
+          .toList());
   print('filtered rules ${rulesListForEvent.rules}');
   rulesListForEvent.rules.forEach((rule) {
 //    if (rule.device.deviceId != null) deviceIdsToToggle.add(rule.device.deviceId);
@@ -69,6 +75,7 @@ void doGeofenceActions(String event, String identifier) async {
         "deviceId": deviceId,
       });
       print("toggle response::: $responseBody");
+      LocalNotifications.send("Arrive", "Backend response $responseBody");
       if (responseBody["result"] == true && responseBody["status"] == 'ok') {
         if (rule.secondToggle && rule.secondToggleTimeout > 0) {
           await Future.delayed(Duration(seconds: rule.secondToggleTimeout));
@@ -78,9 +85,9 @@ void doGeofenceActions(String event, String identifier) async {
             "deviceId": deviceId,
           });
           print("toggle response::: $secondResponseBody");
+          LocalNotifications.send("Arrive", "Second response $responseBody");
         }
       }
-      LocalNotifications.send("Arrive", "Backend response $responseBody");
     } catch (err) {
       print(err);
       LocalNotifications.send("Arrive", "Backend error $err");
@@ -114,7 +121,8 @@ class GeofenceUtilities {
       if (!state.enabled) {
         await BackgroundGeolocation.startGeofences();
         if (toAdd.length > 0) print('adding geofence $toAdd');
-        if (toAdd.length > 0) await addGeofences(toAdd.map(parsePlaceToGeofence).toList());
+        if (toAdd.length > 0)
+          await addGeofences(toAdd.map(parsePlaceToGeofence).toList());
       }
     });
   }
@@ -123,7 +131,8 @@ class GeofenceUtilities {
     BackgroundGeolocation.stop();
   }
 
-  static Future<bool> checkGeofenceRules({bool doNotEnableService = false /* when called from headless */}) async {
+  static Future<bool> checkGeofenceRules(
+      {bool doNotEnableService = false /* when called from headless */}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.reload();
     GeofenceRules rulesList = new GeofenceRules();
@@ -134,10 +143,12 @@ class GeofenceUtilities {
       return false;
     }
     if (gs != null) rulesList = GeofenceRules.fromString(gs);
-    rulesList.rules = rulesList.rules.where((item) => item.userEmail == userEmail).toList();
+    rulesList.rules =
+        rulesList.rules.where((item) => item.userEmail == userEmail).toList();
 
     List<Geofence> geofences = await BackgroundGeolocation.geofences;
-    var registeredGeofences = geofences.map((Geofence goefence) => goefence.identifier);
+    var registeredGeofences =
+        geofences.map((Geofence goefence) => goefence.identifier);
     List<Place> toAdd = [];
 
     bool atLeastOneRuleIsActive = false;
@@ -198,7 +209,13 @@ class GeofenceUtilities {
   }
 
   static Geofence parseGeofence(dynamic location) {
-    return new Geofence(identifier: location["_id"], latitude: location["latitude"], longitude: location["longitude"], radius: kGeofenceRadius, notifyOnEntry: true, notifyOnExit: true);
+    return new Geofence(
+        identifier: location["_id"],
+        latitude: location["latitude"],
+        longitude: location["longitude"],
+        radius: kGeofenceRadius,
+        notifyOnEntry: true,
+        notifyOnExit: true);
   }
 
   static Geofence parsePlaceToGeofence(Place place) {
