@@ -85,7 +85,7 @@ void doGeofenceActions(String event, String identifier) async {
             "deviceId": deviceId,
           });
           print("toggle response::: $secondResponseBody");
-          LocalNotifications.send("Arrive", "Second response $responseBody");
+          LocalNotifications.send("Arrive", "Second response $secondResponseBody");
         }
       }
     } catch (err) {
