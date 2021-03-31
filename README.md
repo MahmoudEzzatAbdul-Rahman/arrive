@@ -1,7 +1,7 @@
 # arrive
 home sweet home, actions for smart home upon arriving (using geofences).
 
-Initially I'm supporting garage gate and garage lights toggle, could add more in the future
+Initially supporting ewelink login, with a lambda fn endpoint to handle the requests.
 
 
 ## Installation

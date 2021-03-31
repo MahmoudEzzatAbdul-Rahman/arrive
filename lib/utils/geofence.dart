@@ -78,14 +78,19 @@ void doGeofenceActions(String event, String identifier) async {
       LocalNotifications.send("Arrive", "Backend response $responseBody");
       if (responseBody["result"] == true && responseBody["status"] == 'ok') {
         if (rule.secondToggle && rule.secondToggleTimeout > 0) {
+          LocalNotifications.send("Arrive",
+              "Second toggle will fire after ${rule.secondToggleTimeout}");
           await Future.delayed(Duration(seconds: rule.secondToggleTimeout));
           print('toggling device ${rule.device.name} for the second time');
+          LocalNotifications.send(
+              "Arrive", "Toggling ${rule.device.name} for the second time");
           var secondResponseBody = await EwelinkAPI.post({
             'requestMethod': 'toggleDevice',
             "deviceId": deviceId,
           });
           print("toggle response::: $secondResponseBody");
-          LocalNotifications.send("Arrive", "Second response $secondResponseBody");
+          LocalNotifications.send(
+              "Arrive", "Second response $secondResponseBody");
         }
       }
     } catch (err) {
@@ -99,14 +104,15 @@ class GeofenceUtilities {
   static void startGeofenceService({List<Place> toAdd}) async {
     BackgroundGeolocation.onGeofence((GeofenceEvent event) {
       print('[Geofence event] - ${event.toString()}');
-      // Not firing from here, because opening the app at home triggers it!
+      // // Not firing from here, because opening the app at home triggers it!
       // if (event.action == 'ENTER' && event.identifier == '5f1a865f00374700083d3ae9') doGeofenceActions();
       // LocalNotifications.send("Arrive", "${event.action} ${event.identifier}");
       // GeofenceUtilities.notifyGeofenceEvent(event.action, event.identifier, message: "HS Geofence");
+      doGeofenceActions(event.action, event.identifier);
     });
     BackgroundGeolocation.ready(Config(
       notification: Notification(smallIcon: '@drawable/ic_stat_a'),
-      desiredAccuracy: Config.DESIRED_ACCURACY_MEDIUM,
+      desiredAccuracy: Config.DESIRED_ACCURACY_HIGH,
 //      distanceFilter: 30,
       distanceFilter: 10.0,
       stopOnTerminate: false,
@@ -119,7 +125,9 @@ class GeofenceUtilities {
       logLevel: Config.LOG_LEVEL_OFF, // LOG_LEVEL_OFF, LOG_LEVEL_VERBOSE
     )).then((State state) async {
       if (!state.enabled) {
+        LocalNotifications.send("Arrive", "Starting geofence service");
         await BackgroundGeolocation.startGeofences();
+        LocalNotifications.send("Arrive", "Geofence service started");
         if (toAdd.length > 0) print('adding geofence $toAdd');
         if (toAdd.length > 0)
           await addGeofences(toAdd.map(parsePlaceToGeofence).toList());
@@ -128,7 +136,9 @@ class GeofenceUtilities {
   }
 
   static void stopGeofenceService() async {
+    LocalNotifications.send("Arrive", "Stopping geofence service");
     BackgroundGeolocation.stop();
+    LocalNotifications.send("Arrive", "Geofence service stopped");
   }
 
   static Future<bool> checkGeofenceRules(
@@ -210,12 +220,13 @@ class GeofenceUtilities {
 
   static Geofence parseGeofence(dynamic location) {
     return new Geofence(
-        identifier: location["_id"],
-        latitude: location["latitude"],
-        longitude: location["longitude"],
-        radius: kGeofenceRadius,
-        notifyOnEntry: true,
-        notifyOnExit: true);
+      identifier: location["_id"],
+      latitude: location["latitude"],
+      longitude: location["longitude"],
+      radius: kGeofenceRadius,
+      notifyOnEntry: true,
+      notifyOnExit: true,
+    );
   }
 
   static Geofence parsePlaceToGeofence(Place place) {

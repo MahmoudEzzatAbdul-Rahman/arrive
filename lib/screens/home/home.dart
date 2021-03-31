@@ -36,7 +36,7 @@ class HomeScreenState extends State<HomeScreen> {
     getSettings();
   }
 
-  void getSettings({bool doNotCheckGeofenceRules = false /* don't check after adding a rule, as it's already handles in adding a rule */}) async {
+  void getSettings({bool doNotCheckGeofenceRules = false /* don't check after adding a rule, as it's already handled in adding a rule */}) async {
     print('getting settings');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.reload();
