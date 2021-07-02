@@ -10,8 +10,8 @@ class LocalNotifications {
     flutterLocalNotificationsPlugin.initialize(initializationSettings, onSelectNotification: null);
 
     Future.delayed(Duration(seconds: 0)).then((result) async {
-      var androidPlatformChannelSpecifics =
-          AndroidNotificationDetails('BEAM ID', 'BEAM notifications', 'BEAM notifications description', importance: Importance.Low, priority: Priority.Low, ticker: 'ticker');
+      var androidPlatformChannelSpecifics = AndroidNotificationDetails('ARRIVE ID', 'Arrive notifications', 'Notifications about starting/stopping geofencing service',
+          importance: Importance.Low, priority: Priority.Low, ticker: 'ticker');
       var iOSPlatformChannelSpecifics = IOSNotificationDetails();
       var platformChannelSpecifics = NotificationDetails(androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
       await flutterLocalNotificationsPlugin.show(new Random().nextInt(100), title, payload, platformChannelSpecifics, payload: 'item x');
