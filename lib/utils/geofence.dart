@@ -33,21 +33,15 @@ void doGeofenceActions(String event, String identifier) async {
   String _ewelinkEmail = prefs.getString(kEwelinkEmailStorage);
   String _ewelinkPassword = prefs.getString(kEwelinkPasswordStorage);
   if (_ewelinkEmail == null || _ewelinkPassword == null) {
-    LocalNotifications.send(
-        "Arrive", "Couldn't do geofence actions, missing ewelink credentials");
+    LocalNotifications.send("Arrive", "Couldn't do geofence actions, missing ewelink credentials");
     return;
   }
 
   GeofenceRules rulesList = new GeofenceRules();
   String gs = prefs.getString(kGeofenceRulesStorageKey);
   if (gs != null) rulesList = GeofenceRules.fromString(gs);
-  rulesList.rules =
-      rulesList.rules.where((item) => item.userEmail == _ewelinkEmail).toList();
-  GeofenceRules rulesListForEvent = new GeofenceRules(
-      rules: rulesList.rules
-          .where((item) =>
-              item.active && item.event == event && item.place.id == identifier)
-          .toList());
+  rulesList.rules = rulesList.rules.where((item) => item.userEmail == _ewelinkEmail).toList();
+  GeofenceRules rulesListForEvent = new GeofenceRules(rules: rulesList.rules.where((item) => item.active && item.event == event && item.place.id == identifier).toList());
   print('filtered rules ${rulesListForEvent.rules}');
   rulesListForEvent.rules.forEach((rule) {
 //    if (rule.device.deviceId != null) deviceIdsToToggle.add(rule.device.deviceId);
@@ -78,19 +72,16 @@ void doGeofenceActions(String event, String identifier) async {
       LocalNotifications.send("Arrive", "Backend response $responseBody");
       if (responseBody["result"] == true && responseBody["status"] == 'ok') {
         if (rule.secondToggle && rule.secondToggleTimeout > 0) {
-          LocalNotifications.send("Arrive",
-              "Second toggle will fire after ${rule.secondToggleTimeout}");
+          LocalNotifications.send("Arrive", "Second toggle will fire after ${rule.secondToggleTimeout}");
           await Future.delayed(Duration(seconds: rule.secondToggleTimeout));
           print('toggling device ${rule.device.name} for the second time');
-          LocalNotifications.send(
-              "Arrive", "Toggling ${rule.device.name} for the second time");
+          LocalNotifications.send("Arrive", "Toggling ${rule.device.name} for the second time");
           var secondResponseBody = await EwelinkAPI.post({
             'requestMethod': 'toggleDevice',
             "deviceId": deviceId,
           });
           print("toggle response::: $secondResponseBody");
-          LocalNotifications.send(
-              "Arrive", "Second response $secondResponseBody");
+          LocalNotifications.send("Arrive", "Second response $secondResponseBody");
         }
       }
     } catch (err) {
@@ -125,24 +116,22 @@ class GeofenceUtilities {
       logLevel: Config.LOG_LEVEL_OFF, // LOG_LEVEL_OFF, LOG_LEVEL_VERBOSE
     )).then((State state) async {
       if (!state.enabled) {
-        LocalNotifications.send("Arrive", "Starting geofence service");
+        // LocalNotifications.send("Arrive", "Starting geofence service");
         await BackgroundGeolocation.startGeofences();
         LocalNotifications.send("Arrive", "Geofence service started");
         if (toAdd.length > 0) print('adding geofence $toAdd');
-        if (toAdd.length > 0)
-          await addGeofences(toAdd.map(parsePlaceToGeofence).toList());
+        if (toAdd.length > 0) await addGeofences(toAdd.map(parsePlaceToGeofence).toList());
       }
     });
   }
 
   static void stopGeofenceService() async {
-    LocalNotifications.send("Arrive", "Stopping geofence service");
+    // LocalNotifications.send("Arrive", "Stopping geofence service");
     BackgroundGeolocation.stop();
     LocalNotifications.send("Arrive", "Geofence service stopped");
   }
 
-  static Future<bool> checkGeofenceRules(
-      {bool doNotEnableService = false /* when called from headless */}) async {
+  static Future<bool> checkGeofenceRules({bool doNotEnableService = false /* when called from headless */}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.reload();
     GeofenceRules rulesList = new GeofenceRules();
@@ -153,12 +142,10 @@ class GeofenceUtilities {
       return false;
     }
     if (gs != null) rulesList = GeofenceRules.fromString(gs);
-    rulesList.rules =
-        rulesList.rules.where((item) => item.userEmail == userEmail).toList();
+    rulesList.rules = rulesList.rules.where((item) => item.userEmail == userEmail).toList();
 
     List<Geofence> geofences = await BackgroundGeolocation.geofences;
-    var registeredGeofences =
-        geofences.map((Geofence goefence) => goefence.identifier);
+    var registeredGeofences = geofences.map((Geofence goefence) => goefence.identifier);
     List<Place> toAdd = [];
 
     bool atLeastOneRuleIsActive = false;
