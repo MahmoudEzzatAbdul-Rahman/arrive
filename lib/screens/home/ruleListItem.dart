@@ -1,6 +1,5 @@
 import 'package:Arrive/components/styles.dart';
 import 'package:Arrive/models/geofenceRule.dart';
-import 'package:Arrive/models/place.dart';
 import 'package:Arrive/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +40,9 @@ class _RuleListItemState extends State<RuleListItem> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text('Place: ${rule.place.name}', style: kNormalTextStyle),
-                      Text('Event: ${rule.event == "ENTER" ? "Enter" : rule.event == "EXIT" ? "Exit" : ""}', style: kNormalTextStyle),
+                      Text(
+                          'Event: ${rule.event == "ENTER" ? "Enter" : rule.event == "EXIT" ? "Exit" : ""}',
+                          style: kNormalTextStyle),
                       Text('Device: ${rule.device.name}', style: kNormalTextStyle),
                       Text('Action: ${rule.action}', style: kNormalTextStyle),
                       Row(

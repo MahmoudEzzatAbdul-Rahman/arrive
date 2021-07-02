@@ -8,7 +8,6 @@ import 'package:Arrive/utils/colors.dart';
 import 'package:Arrive/utils/geofence.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../utils/constants.dart';
@@ -32,7 +31,6 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // TODO: add geofence
     getSettings();
   }
 
