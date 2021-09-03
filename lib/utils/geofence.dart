@@ -103,9 +103,10 @@ class GeofenceUtilities {
     });
     BackgroundGeolocation.ready(Config(
       notification: Notification(smallIcon: '@drawable/ic_stat_a'),
-      desiredAccuracy: Config.DESIRED_ACCURACY_HIGH,
-//      distanceFilter: 30,
+      desiredAccuracy: Config.DESIRED_ACCURACY_MEDIUM,
       distanceFilter: 10.0,
+      // distanceFilter: 0,
+      // locationUpdateInterval: 5000,
       stopOnTerminate: false,
       startOnBoot: true,
       debug: false,
@@ -118,7 +119,7 @@ class GeofenceUtilities {
       if (!state.enabled) {
         // LocalNotifications.send("Arrive", "Starting geofence service");
         await BackgroundGeolocation.startGeofences();
-        LocalNotifications.send("Arrive", "Geofence service started");
+        // LocalNotifications.send("Arrive", "Geofence service started");
         if (toAdd.length > 0) print('adding geofence $toAdd');
         if (toAdd.length > 0) await addGeofences(toAdd.map(parsePlaceToGeofence).toList());
       }
@@ -128,7 +129,7 @@ class GeofenceUtilities {
   static void stopGeofenceService() async {
     // LocalNotifications.send("Arrive", "Stopping geofence service");
     BackgroundGeolocation.stop();
-    LocalNotifications.send("Arrive", "Geofence service stopped");
+    // LocalNotifications.send("Arrive", "Geofence service stopped");
   }
 
   static Future<bool> checkGeofenceRules({bool doNotEnableService = false /* when called from headless */}) async {
