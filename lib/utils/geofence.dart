@@ -103,7 +103,7 @@ class GeofenceUtilities {
     });
     BackgroundGeolocation.ready(Config(
       notification: Notification(smallIcon: '@drawable/ic_stat_a'),
-      desiredAccuracy: Config.DESIRED_ACCURACY_MEDIUM,
+      desiredAccuracy: Config.DESIRED_ACCURACY_HIGH,
       distanceFilter: 10.0,
       // distanceFilter: 0,
       // locationUpdateInterval: 5000,
